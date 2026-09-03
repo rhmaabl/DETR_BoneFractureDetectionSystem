@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Model checkpoint (large binary; not tracked in git)
+model.ckpt
+
+# OS files
+.DS_Store
+Thumbs.db
+model_export/
+venv/
+__pycache__/
+*.pyc

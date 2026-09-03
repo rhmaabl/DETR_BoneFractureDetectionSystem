@@ -13,7 +13,7 @@ Cara pakai:
 from transformers import DetrForObjectDetection, DetrImageProcessor
 
 MODEL_DIR = "model_export"          # folder hasil ekstrak detr_fracatlas_fixed_hf.zip
-HF_REPO_ID = "nantarach/bone-fracture-detr-v2"  # ganti sesuai username & nama repo HF kamu
+HF_REPO_ID = "rahmabeee/bone-fracture-detr-v2"  # ganti sesuai username & nama repo HF kamu
 
 model = DetrForObjectDetection.from_pretrained(MODEL_DIR)
 processor = DetrImageProcessor.from_pretrained(MODEL_DIR)

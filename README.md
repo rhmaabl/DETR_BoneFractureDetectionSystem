@@ -29,13 +29,13 @@ Sistem deteksi fraktur tulang pada citra X-Ray menggunakan model Deep Learning b
 ### Prasyarat
 - Python 3.9+
 - Koneksi internet (model akan diunduh otomatis dari HuggingFace Hub:
-  [`nantarach/bone-fracture-detr-v2`](https://huggingface.co/nantarach/bone-fracture-detr-v2))
+  [`rahmabeee/bone-fracture-detr-v2`](https://huggingface.co/rahmabeee/bone-fracture-detr-v2))
 
 ### Langkah Instalasi
 
 ```bash
-git clone https://github.com/rahmaab14/BoneFractureDetectionSystem.git
-cd BoneFractureDetectionSystem
+git clone https://github.com/rhmaabl/DETR_BoneFractureDetectionSystem.git
+cd DETR_BoneFractureDetectionSystem
 
 python -m venv venv
 source venv/bin/activate  # Linux/macOS
@@ -60,7 +60,7 @@ Variabel penting di bagian atas `app.py`:
 
 | Variabel | Default | Deskripsi |
 |---|---|---|
-| `MODEL_CHECKPOINT` | `"nantarach/bone-fracture-detr-v2"` | ID model HuggingFace Hub |
+| `MODEL_CHECKPOINT` | `"rahmabeee/bone-fracture-detr-v2"` | ID model HuggingFace Hub |
 | `DEFAULT_CONFIDENCE` | `0.1` | Nilai default slider confidence threshold |
 | `NMS_IOU_THRESHOLD` | `0.5` | Ambang batas IoU untuk Non-Maximum Suppression |
 | `FRACTURE_LABEL` | `0` | ID label kelas fraktur pada model DETR |
