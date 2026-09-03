@@ -878,10 +878,10 @@ with st.sidebar:
 
     confidence_threshold = st.slider(
         "Confidence Threshold",
-        min_value=0.1,
+        min_value=0.01,
         max_value=0.95,
         value=DEFAULT_CONFIDENCE,
-        step=0.05,
+        step=0.01,
         help="Ambang batas minimum confidence score. Deteksi di bawah nilai ini akan diabaikan.",
     )
 
