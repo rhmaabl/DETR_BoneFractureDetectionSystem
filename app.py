@@ -401,6 +401,8 @@ BOX_COLOR = (99, 102, 241)         # Warna bounding box (indigo/ungu, RGB)
 OUTLINE_COLOR = (255, 255, 255)    # Tepi putih tipis agar garis ungu tetap tajam
 TEXT_BG_COLOR = (99, 102, 241)     # Warna latar label teks
 TEXT_COLOR = (255, 255, 255)       # Warna teks label
+BOX_SCALE = 2.5                    # Pembesaran box saat digambar (1.0 = ukuran asli dari model)
+MIN_BOX_SIDE_RATIO = 0.10          # Sisi minimum box gambar = 10% sisi terpendek citra
 
 FRACTURE_LABEL = 0                 # Label 0 = fraktur pada model DETR
 MIN_BOX_AREA_RATIO = 0.001        # Min rasio luas bbox/gambar (< 0.1% = noise piksel)
@@ -685,6 +687,16 @@ def draw_detections(image: Image.Image, detections: List[Dict]) -> Image.Image:
     for idx, det in enumerate(detections, start=1):
         x1, y1, x2, y2 = det["box"]
         conf = det["score"]
+
+        # Perbesar box (khusus tampilan) dari titik tengahnya agar area
+        # fraktur terlihat di dalam box. Data deteksi asli tidak diubah.
+        cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+        bw = max((x2 - x1) * BOX_SCALE, short * MIN_BOX_SIDE_RATIO)
+        bh = max((y2 - y1) * BOX_SCALE, short * MIN_BOX_SIDE_RATIO)
+        x1 = int(max(0, cx - bw / 2))
+        y1 = int(max(0, cy - bh / 2))
+        x2 = int(min(W - 1, cx + bw / 2))
+        y2 = int(min(H - 1, cy + bh / 2))
 
         # Tepi hitam di luar & dalam garis, lalu garis warna di tengahnya
         draw.rectangle(
