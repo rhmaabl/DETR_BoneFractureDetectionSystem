@@ -397,9 +397,10 @@ MODEL_CHECKPOINT = "rahmabeee/bone-fracture-detr-v2"  # HuggingFace Hub model ID
 DEFAULT_CONFIDENCE = 0.1           # Ambang batas confidence default
 NMS_IOU_THRESHOLD = 0.5            # Ambang batas IoU untuk NMS (tidak dapat diubah via UI)
 MAX_IMAGE_SIDE = 800               # Panjang sisi terpanjang untuk resize (px)
-BOX_COLOR = (99, 102, 241)         # Warna bounding box (indigo, RGB)
-TEXT_BG_COLOR = (99, 102, 241)     # Warna latar label teks
-TEXT_COLOR = (255, 255, 255)       # Warna teks label
+BOX_COLOR = (255, 215, 0)          # Warna bounding box (kuning emas, kontras di X-Ray gelap)
+OUTLINE_COLOR = (0, 0, 0)          # Warna tepi hitam agar garis tetap tajam
+TEXT_BG_COLOR = (255, 215, 0)      # Warna latar label teks
+TEXT_COLOR = (0, 0, 0)             # Warna teks label
 
 FRACTURE_LABEL = 0                 # Label 0 = fraktur pada model DETR
 MIN_BOX_AREA_RATIO = 0.001        # Min rasio luas bbox/gambar (< 0.1% = noise piksel)
@@ -652,12 +653,16 @@ def _load_font(font_size: int) -> ImageFont.FreeTypeFont:
             return ImageFont.truetype(fp, font_size)
         except IOError:
             continue
-    return ImageFont.load_default()
+    # Fallback: Pillow >= 10.1 mendukung ukuran pada font bawaan
+    try:
+        return ImageFont.load_default(font_size)
+    except TypeError:
+        return ImageFont.load_default()
 
 
 def draw_detections(image: Image.Image, detections: List[Dict]) -> Image.Image:
     """
-    Menggambar bounding box beserta label confidence pada gambar.
+    Menggambar bounding box tebal beserta label confidence pada gambar.
 
     Args:
         image: Gambar asli dalam format PIL.Image.
@@ -668,47 +673,43 @@ def draw_detections(image: Image.Image, detections: List[Dict]) -> Image.Image:
     """
     annotated = image.copy().convert("RGB")
     draw = ImageDraw.Draw(annotated)
+    W, H = annotated.size
+    short = min(W, H)
 
-    # Tentukan ukuran font proporsional terhadap gambar
-    font_size = max(14, int(min(annotated.size) * 0.025))
+    line_width = max(4, int(short * 0.008))     # ketebalan garis box
+    font_size = max(28, int(short * 0.04))      # ukuran font label
+    halo = max(2, line_width // 2)              # tebal tepi hitam
+    pad = max(6, font_size // 4)
     font = _load_font(font_size)
 
     for idx, det in enumerate(detections, start=1):
         x1, y1, x2, y2 = det["box"]
         conf = det["score"]
 
-        # Ketebalan garis bounding box
-        line_width = max(2, int(min(annotated.size) * 0.003))
-
-        # Gambar bounding box
+        # Tepi hitam di luar & dalam garis, lalu garis warna di tengahnya
+        draw.rectangle(
+            [x1 - halo, y1 - halo, x2 + halo, y2 + halo],
+            outline=OUTLINE_COLOR, width=line_width + halo * 2,
+        )
         draw.rectangle([x1, y1, x2, y2], outline=BOX_COLOR, width=line_width)
 
-        # Buat teks label: nomor urut + confidence
-        label_text = f"#{idx} Fraktur {conf * 100:.1f}%"
+        # Label: nomor urut + confidence
+        label = f"#{idx} Fraktur {conf * 100:.1f}%"
+        l, t, r, b = draw.textbbox((0, 0), label, font=font)
+        tw, th = r - l, b - t
+        box_w, box_h = tw + pad * 2, th + pad * 2
 
-        # Hitung ukuran kotak teks menggunakan textbbox
-        text_bbox = draw.textbbox((x1, y1), label_text, font=font)
-        text_w = text_bbox[2] - text_bbox[0]
-        text_h = text_bbox[3] - text_bbox[1]
+        # Jaga label tetap di dalam gambar
+        bx1 = min(max(0, x1), max(0, W - box_w))
+        by1 = y1 - box_h - halo
+        if by1 < 0:  # tidak muat di atas -> taruh di dalam box
+            by1 = y1 + line_width
 
-        # Posisi latar belakang teks (di atas bounding box)
-        padding = 4
-        bg_y1 = max(0, y1 - text_h - padding * 2)
-        bg_y2 = y1
-
-        # Gambar latar belakang teks
         draw.rectangle(
-            [x1, bg_y1, x1 + text_w + padding * 2, bg_y2],
-            fill=TEXT_BG_COLOR,
+            [bx1, by1, bx1 + box_w, by1 + box_h],
+            fill=TEXT_BG_COLOR, outline=OUTLINE_COLOR, width=2,
         )
-
-        # Gambar teks label
-        draw.text(
-            (x1 + padding, bg_y1 + padding),
-            label_text,
-            fill=TEXT_COLOR,
-            font=font,
-        )
+        draw.text((bx1 + pad - l, by1 + pad - t), label, fill=TEXT_COLOR, font=font)
 
     return annotated
 
