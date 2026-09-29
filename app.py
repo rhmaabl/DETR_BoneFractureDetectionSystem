@@ -678,7 +678,7 @@ def draw_detections(image: Image.Image, detections: List[Dict]) -> Image.Image:
     W, H = annotated.size
     short = min(W, H)
 
-    line_width = max(3, int(short * 0.004))     # ketebalan garis box
+    line_width = max(4, int(short * 0.006))     # ketebalan garis box
     font_size = max(18, int(short * 0.028))      # ukuran font label
     halo = 1              # tebal tepi hitam
     pad = max(4, font_size // 4)
