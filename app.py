@@ -397,10 +397,10 @@ MODEL_CHECKPOINT = "rahmabeee/bone-fracture-detr-v2"  # HuggingFace Hub model ID
 DEFAULT_CONFIDENCE = 0.1           # Ambang batas confidence default
 NMS_IOU_THRESHOLD = 0.5            # Ambang batas IoU untuk NMS (tidak dapat diubah via UI)
 MAX_IMAGE_SIDE = 800               # Panjang sisi terpanjang untuk resize (px)
-BOX_COLOR = (255, 215, 0)          # Warna bounding box (kuning emas, kontras di X-Ray gelap)
-OUTLINE_COLOR = (0, 0, 0)          # Warna tepi hitam agar garis tetap tajam
-TEXT_BG_COLOR = (255, 215, 0)      # Warna latar label teks
-TEXT_COLOR = (0, 0, 0)             # Warna teks label
+BOX_COLOR = (99, 102, 241)         # Warna bounding box (indigo/ungu, RGB)
+OUTLINE_COLOR = (255, 255, 255)    # Tepi putih tipis agar garis ungu tetap tajam
+TEXT_BG_COLOR = (99, 102, 241)     # Warna latar label teks
+TEXT_COLOR = (255, 255, 255)       # Warna teks label
 
 FRACTURE_LABEL = 0                 # Label 0 = fraktur pada model DETR
 MIN_BOX_AREA_RATIO = 0.001        # Min rasio luas bbox/gambar (< 0.1% = noise piksel)
@@ -676,10 +676,10 @@ def draw_detections(image: Image.Image, detections: List[Dict]) -> Image.Image:
     W, H = annotated.size
     short = min(W, H)
 
-    line_width = max(4, int(short * 0.008))     # ketebalan garis box
-    font_size = max(28, int(short * 0.04))      # ukuran font label
-    halo = max(2, line_width // 2)              # tebal tepi hitam
-    pad = max(6, font_size // 4)
+    line_width = max(3, int(short * 0.004))     # ketebalan garis box
+    font_size = max(18, int(short * 0.028))      # ukuran font label
+    halo = 1              # tebal tepi hitam
+    pad = max(4, font_size // 4)
     font = _load_font(font_size)
 
     for idx, det in enumerate(detections, start=1):
@@ -707,7 +707,7 @@ def draw_detections(image: Image.Image, detections: List[Dict]) -> Image.Image:
 
         draw.rectangle(
             [bx1, by1, bx1 + box_w, by1 + box_h],
-            fill=TEXT_BG_COLOR, outline=OUTLINE_COLOR, width=2,
+            fill=TEXT_BG_COLOR, outline=OUTLINE_COLOR, width=1,
         )
         draw.text((bx1 + pad - l, by1 + pad - t), label, fill=TEXT_COLOR, font=font)
 
